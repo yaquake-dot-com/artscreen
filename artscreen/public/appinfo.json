@@ -1,0 +1,14 @@
+{
+  "id": "org.artscreen.gallery",
+  "version": "0.2.0",
+  "vendor": "ArtScreen",
+  "type": "web",
+  "main": "index.html",
+  "title": "ArtScreen",
+  "icon": "icon.png",
+  "largeIcon": "icon.png",
+  "resolution": "1920x1080",
+  "transparent": false,
+  "requiredACG": [],
+  "appDescription": "Классическая живопись на чёрном фоне"
+}

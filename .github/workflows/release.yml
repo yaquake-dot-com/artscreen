@@ -1,0 +1,51 @@
+name: Build ArtScreen
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: artscreen/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run package
+      - if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/repository.mjs build/org.artscreen.gallery_*_all.ipk "$RELEASE_REPOSITORY" "$RELEASE_TAG"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ArtScreen-webOS
+          path: artscreen/build/
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ArtScreen-webOS
+          path: release
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" release/* --title "ArtScreen $RELEASE_TAG" --generate-notes

@@ -1,0 +1,16 @@
+import {readFile,mkdir,writeFile,copyFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {basename,resolve} from 'node:path';
+const [ipk,repository,tag]=process.argv.slice(2);
+if(!ipk||!/^[-\w.]+\/[-\w.]+$/.test(repository||'')||!/^v\d+\.\d+\.\d+$/.test(tag||''))throw Error('Usage: node scripts/repository.mjs build/app.ipk owner/repo vX.Y.Z');
+const info=JSON.parse(await readFile('dist/appinfo.json','utf8'));
+if(tag!==`v${info.version}`)throw Error('Tag and packaged version differ');
+const bytes=await readFile(ipk),base=`https://github.com/${repository}/releases/download/${tag}`;
+const manifest={id:info.id,version:info.version,type:'web',title:info.title,appDescription:info.appDescription,iconUri:`${base}/icon.png`,sourceUrl:`https://github.com/${repository}`,rootRequired:false,ipkUrl:`${base}/${basename(ipk)}`,ipkHash:{sha256:createHash('sha256').update(bytes).digest('hex')},ipkSize:bytes.length};
+const name=`${info.id}.manifest.json`;
+const index={paging:{page:1,count:1,maxPage:1,itemsTotal:1,prevUrl:null,nextUrl:null},packages:[{id:info.id,title:info.title,iconUri:manifest.iconUri,manifestUrl:`${base}/${name}`,manifest,pool:'main',shortDescription:info.appDescription}]};
+await mkdir('build',{recursive:true});
+for(const [file,data] of [[name,manifest],['apps.json',index]])await writeFile(resolve('build',file),JSON.stringify(data,null,2)+'\n');
+await copyFile('dist/icon.png','build/icon.png');
+await writeFile('build/SHA256SUMS',`${manifest.ipkHash.sha256}  ${basename(ipk)}\n`);
+console.log('Homebrew catalogue and checksums ready');
