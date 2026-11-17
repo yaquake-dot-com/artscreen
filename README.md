@@ -22,11 +22,11 @@ npm test
 npm run package
 ```
 
-Пакет: `artscreen/build/org.artscreen.gallery_0.2.0_all.ipk`.
+Пакет: `artscreen/build/org.artscreen.gallery_0.2.1_all.ipk`.
 Установка через webOS Dev Manager или:
 
 ```sh
-npx ares-install --device lgtv build/org.artscreen.gallery_0.2.0_all.ipk
+npx ares-install --device lgtv build/org.artscreen.gallery_0.2.1_all.ipk
 npx ares-launch --device lgtv org.artscreen.gallery
 ```
 
@@ -40,7 +40,7 @@ npx ares-launch --device lgtv org.artscreen.gallery
 
 ## Releases и Homebrew Channel
 
-Отправка в main запускает тесты и сборку с IPK-артефактом. Тег `v0.2.0` запускает публикацию GitHub Release: IPK, SHA256SUMS, icon.png, apps.json и манифест с SHA-256 пакета. Версии package.json, appinfo.json и тега должны совпадать.
+Отправка в main запускает тесты и сборку с IPK-артефактом. Тег `v0.2.1` запускает публикацию GitHub Release: IPK, SHA256SUMS, icon.png, apps.json и манифест с SHA-256 пакета. Версии package.json, appinfo.json и тега должны совпадать.
 
 В Homebrew Channel → настройки → добавить репозиторий:
 
@@ -57,3 +57,9 @@ https://github.com/yaquake-dot-com/artscreen/releases/latest/download/apps.json
 Замена штатного скринсейвера пока не реализована. Это отдельная интеграция, зависящая от прошивки и доступа root; установка IPK не изменяет системный скринсейвер.
 
 Инструменты webOS CLI имеют транзитивные зависимости с известными предупреждениями npm audit; они используются только при разработке и упаковке и не входят в IPK.
+
+## Штатная заставка webOS
+
+Начиная с 0.2.1 ArtScreen подписывается на запросы tvpower и отвечает запретом заставки, пока находится на переднем плане. Этот внутренний API может быть закрыт или проигнорирован прошивкой. Дополнительно на webOS воспроизводится локальное беззвучное чёрное H.264-видео на весь экран под картинами — исключение из стандартного таймера заставки, описанное в [руководстве LG](https://webostv.developer.lge.com/develop/guides/screensaver). Видео не использует сеть и не обрезает картины. При сворачивании подписка отменяется, видео останавливается; при возврате сеанс возобновляется. Настройки системы, таймер выключения и файлы прошивки не изменяются.
+
+Проверка на LG C2: обновить приложение, запустить и оставить без пульта минимум на 10 минут (затем на 35 минут); проверить, что картины меняются и штатная заставка не появляется. После выхода убедиться, что обычная заставка в других приложениях продолжает работать. Поведение этой версии на реальном телевизоре ещё не подтверждено.

@@ -2,10 +2,12 @@ import {render} from 'preact';
 import {useEffect,useRef,useState} from 'preact/hooks';
 import works from './art.json';
 import {image} from './cache';
+import {startDisplaySession} from './display-session';
 import './style.css';
 const INTERVAL=300000, FADE=1600;
 type Slide={url:string; title:string; x:number; y:number};
 function App(){
+ useEffect(()=>startDisplaySession(),[]);
  const [slides,setSlides]=useState<(Slide|null)[]>([null,null]);
  const [active,setActive]=useState(0),[message,setMessage]=useState('Загрузка картин…');
  const navigate=useRef<(direction:number)=>void>(()=>{});
